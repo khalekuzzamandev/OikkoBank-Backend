@@ -132,7 +132,7 @@ export const updateUser = async (req: Request, res: Response) => {
 
       // Status
       if (field === "status") {
-        const allowedStatuses = ["Active", "pending","inactive", "Blocked"];
+        const allowedStatuses = ["active", "pending","inactive", "blocked"];
 
         if (
           typeof value !== "string" ||
