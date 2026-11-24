@@ -41,40 +41,165 @@ export const getUserById = async (req: Request, res: Response) => {
   }
 };
 
+
+
+// Update user
 export const updateUser = async (req: Request, res: Response) => {
   try {
     const body: unknown = req.body;
-    if (typeof body !== "object" || body === null || Array.isArray(body)) {
-      res.status(400).json({ success: false, message: "Invalid request body" });
-      return;
-    }
 
-    const input = body as Record<string, unknown>;
-    const allowedFields = ["name", "email"] as const;
     if (
-      Object.keys(input).some(
-        (field) => !allowedFields.some((allowedField) => allowedField === field),
-      )
+      typeof body !== "object" ||
+      body === null ||
+      Array.isArray(body)
     ) {
       res.status(400).json({
         success: false,
-        message: "Only name and email can be updated",
+        message: "Invalid request body",
       });
       return;
     }
 
-    const updates: { name?: string; email?: string } = {};
+    const input = body as Record<string, unknown>;
+
+    // All editable customer fields
+    const allowedFields = [
+      "name",
+      "email",
+      "image",
+      "status",
+      "fatherName",
+      "motherName",
+      "dob",
+      "gender",
+    ] as const;
+
+    // Check invalid fields
+    const invalidFields = Object.keys(input).filter(
+      (field) => !allowedFields.includes(
+        field as (typeof allowedFields)[number]
+      )
+    );
+
+    if (invalidFields.length > 0) {
+      res.status(400).json({
+        success: false,
+        message: "Some fields are not allowed to update",
+        fields: invalidFields,
+      });
+      return;
+    }
+
+    const updates: Record<string, unknown> = {};
+
+    // Validate and prepare updates
     for (const field of allowedFields) {
       if (!(field in input)) continue;
+
       const value = input[field];
-      if (typeof value !== "string" || value.trim() === "") {
-        res.status(400).json({
-          success: false,
-          message: `${field} must be a non-empty string`,
-        });
-        return;
+
+      // Name and Email
+      if (field === "name" || field === "email") {
+        if (typeof value !== "string" || !value.trim()) {
+          res.status(400).json({
+            success: false,
+            message: `${field} must be a non-empty string`,
+          });
+          return;
+        }
+
+        updates[field] =
+          field === "email"
+            ? value.trim().toLowerCase()
+            : value.trim();
+
+        continue;
       }
-      updates[field] = value.trim();
+
+      // Image
+      if (field === "image") {
+        if (typeof value !== "string") {
+          res.status(400).json({
+            success: false,
+            message: "Image must be a string",
+          });
+          return;
+        }
+
+        updates[field] = value.trim();
+        continue;
+      }
+
+      // Status
+      if (field === "status") {
+        const allowedStatuses = ["Active", "pending","inactive", "Blocked"];
+
+        if (
+          typeof value !== "string" ||
+          !allowedStatuses.includes(value)
+        ) {
+          res.status(400).json({
+            success: false,
+            message: "Invalid customer status",
+          });
+          return;
+        }
+
+        updates[field] = value;
+        continue;
+      }
+
+      // Father and Mother Name
+      if (field === "fatherName" || field === "motherName") {
+        if (typeof value !== "string") {
+          res.status(400).json({
+            success: false,
+            message: `${field} must be a string`,
+          });
+          return;
+        }
+
+        updates[field] = value.trim();
+        continue;
+      }
+
+      // Date of Birth
+      if (field === "dob") {
+        if (value === "") {
+          updates[field] = null;
+        } else if (
+          typeof value === "string" &&
+          !Number.isNaN(Date.parse(value))
+        ) {
+          updates[field] = new Date(value);
+        } else {
+          res.status(400).json({
+            success: false,
+            message: "Invalid date of birth",
+          });
+          return;
+        }
+
+        continue;
+      }
+
+      // Gender
+      if (field === "gender") {
+        const allowedGenders = ["Male", "Female", "Other"];
+
+        if (
+          typeof value !== "string" ||
+          (value !== "" && !allowedGenders.includes(value))
+        ) {
+          res.status(400).json({
+            success: false,
+            message: "Invalid gender",
+          });
+          return;
+        }
+
+        updates[field] = value;
+      }
     }
 
     if (Object.keys(updates).length === 0) {
@@ -86,23 +211,31 @@ export const updateUser = async (req: Request, res: Response) => {
     }
 
     const id = req.params.id as string;
+
     const user = await updateUserService(id, updates);
 
     if (user === "INVALID_ID") {
-      res.status(400).json({ success: false, message: "Invalid user id" });
+      res.status(400).json({
+        success: false,
+        message: "Invalid user id",
+      });
       return;
     }
 
     if (!user) {
-      res.status(404).json({ success: false, message: "User not found" });
+      res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
       return;
     }
 
     res.status(200).json({
       success: true,
-      message: "User updated successfully",
+      message: "Customer updated successfully",
       data: user,
     });
+
   } catch (error) {
     if (
       typeof error === "object" &&
@@ -110,11 +243,19 @@ export const updateUser = async (req: Request, res: Response) => {
       "code" in error &&
       error.code === 11000
     ) {
-      res.status(409).json({ success: false, message: "Email already exists" });
+      res.status(409).json({
+        success: false,
+        message: "Email already exists",
+      });
       return;
     }
 
-    res.status(500).json({ success: false, message: "Server error" });
+    console.error("Update user error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
   }
 };
 
