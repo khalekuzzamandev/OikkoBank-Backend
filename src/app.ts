@@ -1,6 +1,6 @@
 import cors from "cors";
 import express, { type Express } from "express";
-import accountRoutes from "./models/Account/account.route.js";
+
 import userRoutes from "./models/user/user.route.js";
 
 const app: Express = express();
@@ -16,8 +16,8 @@ app.get("/", (req, res) => {
 
 // get all users
 app.use("/api/users", userRoutes);
-app.use("/api/accounts", accountRoutes);
-// delete unic user
+
+
 
 
 export default app;
