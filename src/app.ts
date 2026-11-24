@@ -14,7 +14,8 @@ app.get("/", (req, res) => {
 
 
 // get all users
-
 app.use("/api/users", userRoutes);
+// delete unic user
+
 
 export default app;

@@ -16,3 +16,19 @@ export const getUserByIdService = async (id: string) => {
   if (!isValidObjectId(id)) return "INVALID_ID" as const;
   return User.findById(id).select("-password");
 };
+
+export const updateUserService = async (
+  id: string,
+  updates: { name?: string; email?: string },
+) => {
+  if (!isValidObjectId(id)) return "INVALID_ID" as const;
+  return User.findByIdAndUpdate(id, updates, {
+    new: true,
+    runValidators: true,
+  }).select("-password");
+};
+
+export const deleteUserService = async (id: string) => {
+  if (!isValidObjectId(id)) return "INVALID_ID" as const;
+  return User.findByIdAndDelete(id);
+};
