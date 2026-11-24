@@ -2,7 +2,7 @@ import cors from "cors";
 import express, { type Express } from "express";
 
 import userRoutes from "./models/user/user.route.js";
-
+import accountRoutes from "./models/Account/account.route.js";
 const app: Express = express();
 
 app.use(cors());
@@ -17,7 +17,8 @@ app.get("/", (req, res) => {
 // get all users
 app.use("/api/users", userRoutes);
 
-
+// Account Routes
+app.use("/api/accounts", accountRoutes);
 
 
 export default app;

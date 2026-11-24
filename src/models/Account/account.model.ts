@@ -12,10 +12,6 @@ const accountSchema = new Schema(
       type: String,
       required: true,
     },
-    staffId: {
-      type: String,
-      required: true,
-    },
     staffEmail: {
       type: String,
       required: true,
