@@ -15,6 +15,11 @@ const getAccountById = async (id: string) => {
   return await Account.findById(id);
 };
 
+// Get Accounts by User ID
+const getAccountsByUserId = async (userId: string) => {
+  return await Account.find({ userId }).sort({ createdAt: -1 });
+};
+
 // Update Account
 const updateAccount = async (id: string, accountData: any) => {
   return await Account.findByIdAndUpdate(id, accountData, {
@@ -32,6 +37,7 @@ export const accountService = {
   createAccount,
   getAllAccounts,
   getAccountById,
+  getAccountsByUserId,
   updateAccount,
   deleteAccount,
 };

@@ -74,6 +74,39 @@ const getAccountById = async (req: Request, res: Response) => {
   }
 };
 
+// Get Accounts by User ID
+const getAccountsByUserId = async (req: Request, res: Response) => {
+  try {
+    const userId = req.params.userId;
+    if (typeof userId !== "string") {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid user ID",
+      });
+    }
+
+    const accounts = await accountService.getAccountsByUserId(userId);
+
+    if (accounts.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No accounts found for this user",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "User accounts fetched successfully",
+      data: accounts,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 // Update Account
 const updateAccount = async (req: Request, res: Response) => {
   try {
@@ -147,6 +180,7 @@ export const accountController = {
   createAccount,
   getAllAccounts,
   getAccountById,
+  getAccountsByUserId,
   updateAccount,
   deleteAccount,
 };
