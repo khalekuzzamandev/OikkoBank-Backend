@@ -1,6 +1,7 @@
 import cors from "cors";
 import express, { type Express } from "express";
 
+import { connectToDatabase } from "./config/index.js";
 import userRoutes from "./models/user/user.route.js";
 import accountRoutes from "./models/Account/account.route.js";
 const app: Express = express();
@@ -13,6 +14,14 @@ app.get("/", (req, res) => {
   res.status(200).send("Welcome to Oikko Bank API");
 });
 
+app.use("/api", async (_req, _res, next) => {
+  try {
+    await connectToDatabase();
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
 
 // get all users
 app.use("/api/users", userRoutes);
