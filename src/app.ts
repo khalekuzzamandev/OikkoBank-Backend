@@ -4,6 +4,7 @@ import express, { type Express } from "express";
 import { connectToDatabase } from "./config/index.js";
 import userRoutes from "./models/user/user.route.js";
 import accountRoutes from "./models/Account/account.route.js";
+import depositRoutes from "./models/Deposit/user.route.js";
 const app: Express = express();
 
 app.use(cors());
@@ -28,6 +29,9 @@ app.use("/api/users", userRoutes);
 
 // Account Routes
 app.use("/api/accounts", accountRoutes);
+
+// Deposit Routes
+app.use("/api/deposits", depositRoutes);
 
 
 export default app;
