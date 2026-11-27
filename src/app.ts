@@ -7,6 +7,7 @@ import accountRoutes from "./models/Account/account.route.js";
 import depositRoutes from "./models/Deposit/user.route.js";
 import loanRoutes from "./models/Loan/loan.route.js";
 import withdrawRoutes from "./models/withdraw/user.route.js";
+import transferRoutes from "./models/Transfer/transfer.route.js";
 const app: Express = express();
 
 app.use(cors());
@@ -41,5 +42,7 @@ app.use("/api/loans", loanRoutes);
 // Withdrawal Routes
 app.use("/api/withdrawals", withdrawRoutes);
 
+// Transfer Routes
+app.use("/api/transfers", transferRoutes);
 
 export default app;
