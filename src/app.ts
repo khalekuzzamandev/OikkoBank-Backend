@@ -6,7 +6,7 @@ import userRoutes from "./models/user/user.route.js";
 import accountRoutes from "./models/Account/account.route.js";
 import depositRoutes from "./models/Deposit/user.route.js";
 import loanRoutes from "./models/Loan/loan.route.js";
-import withdrawRoutes from "./models/withdraw/user.route.js";
+import withdrawRoutes from "./models/withdraw/withdraw.route.js";
 import transferRoutes from "./models/Transfer/transfer.route.js";
 import transactionRoutes from "./models/Transaction/user.route.js";
 const app: Express = express();

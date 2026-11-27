@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { isValidObjectId } from "mongoose";
-import { withdrawService } from "./user.service.js";
+import { withdrawService } from "./withdraw.service.js";
 
 const isOneOf = <T extends readonly string[]>(
   value: unknown,
