@@ -16,7 +16,7 @@ const accountTypes = [
   "Student",
   "Fixed Deposit",
 ] as const;
-const transactionStatuses = ["Pending", "Completed", "Failed"] as const;
+const transactionStatuses = ["Pending", "Success", "Completed", "Failed"] as const;
 
 export const createDeposit = async (req: Request, res: Response) => {
   const body: unknown = req.body;

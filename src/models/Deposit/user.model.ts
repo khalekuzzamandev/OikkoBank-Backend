@@ -54,7 +54,7 @@ const depositSchema = new Schema(
     },
     transactionStatus: {
       type: String,
-      enum: ["Pending", "Completed", "Failed"],
+      enum: ["Pending", "Success", "Completed", "Failed"],
       required: true,
     },
     transactionType: {

@@ -11,7 +11,7 @@ type CreateDepositData = {
   depositAmount: number;
   depositMethod: string;
   transactionDate: Date;
-  transactionStatus: "Pending" | "Completed" | "Failed";
+  transactionStatus: "Pending" | "Success" | "Completed" | "Failed";
   transactionType: "Deposit";
   userEmail: string;
   userId: string;
