@@ -151,6 +151,128 @@ export const getDepositById = async (req: Request, res: Response) => {
   }
 };
 
+export const updateDeposit = async (req: Request, res: Response) => {
+  const id = req.params.id;
+  if (typeof id !== "string" || !isValidObjectId(id)) {
+    res.status(400).json({ success: false, message: "Invalid deposit ID" });
+    return;
+  }
+
+  const body: unknown = req.body;
+  if (typeof body !== "object" || body === null || Array.isArray(body)) {
+    res.status(400).json({ success: false, message: "Invalid request body" });
+    return;
+  }
+
+  const input = body as Record<string, unknown>;
+  const stringFields = [
+    "accountName",
+    "accountNumber",
+    "currency",
+    "depositMethod",
+  ];
+  const allowedFields = [
+    ...stringFields,
+    "accountStatus",
+    "accountType",
+    "depositAmount",
+    "transactionDate",
+    "transactionStatus",
+  ];
+  const updateData: Record<string, unknown> = {};
+
+  if (Object.keys(input).length === 0) {
+    res
+      .status(400)
+      .json({ success: false, message: "No deposit fields to update" });
+    return;
+  }
+
+  for (const [key, value] of Object.entries(input)) {
+    if (!allowedFields.includes(key)) {
+      res.status(400).json({
+        success: false,
+        message: `Field '${key}' cannot be updated`,
+      });
+      return;
+    }
+
+    if (stringFields.includes(key)) {
+      if (typeof value !== "string" || !value.trim()) {
+        res.status(400).json({
+          success: false,
+          message: `Invalid value for '${key}'`,
+        });
+        return;
+      }
+      updateData[key] = value.trim();
+    } else if (key === "accountStatus") {
+      if (!isOneOf(value, accountStatuses)) {
+        res
+          .status(400)
+          .json({ success: false, message: "Invalid account status" });
+        return;
+      }
+      updateData[key] = value;
+    } else if (key === "accountType") {
+      if (!isOneOf(value, accountTypes)) {
+        res
+          .status(400)
+          .json({ success: false, message: "Invalid account type" });
+        return;
+      }
+      updateData[key] = value;
+    } else if (key === "transactionStatus") {
+      if (!isOneOf(value, transactionStatuses)) {
+        res
+          .status(400)
+          .json({ success: false, message: "Invalid transaction status" });
+        return;
+      }
+      updateData[key] = value;
+    } else if (key === "transactionDate") {
+      if (typeof value !== "string" || Number.isNaN(Date.parse(value))) {
+        res
+          .status(400)
+          .json({ success: false, message: "Invalid transaction date" });
+        return;
+      }
+      updateData[key] = new Date(value);
+    } else if (key === "depositAmount") {
+      if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) {
+        res.status(400).json({
+          success: false,
+          message: "Deposit amount must be a positive number",
+        });
+        return;
+      }
+      updateData[key] = value;
+    }
+  }
+
+  try {
+    const deposit = await depositService.updateDeposit(id, updateData);
+    if (!deposit) {
+      res.status(404).json({ success: false, message: "Deposit not found" });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Deposit updated successfully",
+      data: deposit,
+    });
+  } catch (error) {
+    if (error instanceof Error && error.name === "ValidationError") {
+      res.status(400).json({ success: false, message: error.message });
+      return;
+    }
+
+    console.error("Update deposit error:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
 export const deleteDeposit = async (req: Request, res: Response) => {
   const id = req.params.id;
   if (typeof id !== "string" || !isValidObjectId(id)) {
