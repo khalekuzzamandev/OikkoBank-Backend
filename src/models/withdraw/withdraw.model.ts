@@ -40,7 +40,12 @@ const withdrawSchema = new Schema(
     },
     recipientAccountNumber: {
       type: String,
+      trim: true,
+    },
+    receiptNumber: {
+      type: String,
       required: true,
+      match: /^\d{9}$/,
       trim: true,
     },
     withdrawalAmount: {

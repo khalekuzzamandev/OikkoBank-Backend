@@ -8,7 +8,8 @@ type CreateWithdrawData = {
   accountStatus: "Active" | "Inactive" | "Pending";
   accountType: "Savings" | "Current" | "Salary" | "Student" | "Fixed Deposit";
   currency: string;
-  recipientAccountNumber: string;
+  recipientAccountNumber?: string;
+  receiptNumber: string;
   withdrawalAmount: number;
   withdrawalMethod: string;
   transactionDate: Date;

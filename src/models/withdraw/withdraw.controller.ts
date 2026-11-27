@@ -39,8 +39,9 @@ export const createWithdraw = async (req: Request, res: Response) => {
     !isOneOf(input.accountType, accountTypes) ||
     typeof input.currency !== "string" ||
     !input.currency.trim() ||
-    typeof input.recipientAccountNumber !== "string" ||
-    !input.recipientAccountNumber.trim() ||
+    (input.recipientAccountNumber !== undefined &&
+      (typeof input.recipientAccountNumber !== "string" ||
+        !input.recipientAccountNumber.trim())) ||
     typeof input.withdrawalMethod !== "string" ||
     !input.withdrawalMethod.trim() ||
     !isOneOf(input.transactionStatus, transactionStatuses) ||
@@ -53,6 +54,17 @@ export const createWithdraw = async (req: Request, res: Response) => {
     res.status(400).json({
       success: false,
       message: "All withdrawal fields must be provided with valid values",
+    });
+    return;
+  }
+
+  if (
+    typeof input.receiptNumber !== "string" ||
+    !/^\d{9}$/.test(input.receiptNumber)
+  ) {
+    res.status(400).json({
+      success: false,
+      message: "Receipt number must be exactly 9 digits",
     });
     return;
   }
@@ -89,7 +101,10 @@ export const createWithdraw = async (req: Request, res: Response) => {
       accountStatus: input.accountStatus,
       accountType: input.accountType,
       currency: input.currency.trim(),
-      recipientAccountNumber: input.recipientAccountNumber.trim(),
+      ...(typeof input.recipientAccountNumber === "string"
+        ? { recipientAccountNumber: input.recipientAccountNumber.trim() }
+        : {}),
+      receiptNumber: input.receiptNumber,
       withdrawalAmount: input.withdrawalAmount,
       withdrawalMethod: input.withdrawalMethod.trim(),
       transactionDate: new Date(input.transactionDate),
