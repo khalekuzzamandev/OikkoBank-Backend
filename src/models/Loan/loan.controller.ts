@@ -179,6 +179,165 @@ export const getLoanById = async (req: Request, res: Response) => {
   }
 };
 
+export const updateLoan = async (req: Request, res: Response) => {
+  const id = req.params.id;
+  if (typeof id !== "string" || !isValidObjectId(id)) {
+    res.status(400).json({ success: false, message: "Invalid loan ID" });
+    return;
+  }
+
+  const body: unknown = req.body;
+  if (typeof body !== "object" || body === null || Array.isArray(body)) {
+    res.status(400).json({ success: false, message: "Invalid request body" });
+    return;
+  }
+
+  const input = body as Record<string, unknown>;
+  const updateData: Record<string, unknown> = {};
+  const stringFields = [
+    "accountName",
+    "accountNumber",
+    "employmentDuration",
+    "loanDuration",
+    "loanType",
+    "occupation",
+    "officePhone",
+    "organization",
+    "repaymentMethod",
+  ];
+  const allowedFields = [
+    ...stringFields,
+    "accountStatus",
+    "accountType",
+    "additionalNotes",
+    "applicationDate",
+    "applicationStatus",
+    "loanAmount",
+    "monthlyExpenses",
+    "monthlyIncome",
+    "termsAccepted",
+  ];
+
+  if (Object.keys(input).length === 0) {
+    res.status(400).json({ success: false, message: "No loan fields to update" });
+    return;
+  }
+
+  for (const [key, value] of Object.entries(input)) {
+    if (!allowedFields.includes(key)) {
+      res.status(400).json({
+        success: false,
+        message: `Field '${key}' cannot be updated`,
+      });
+      return;
+    }
+
+    if (stringFields.includes(key)) {
+      if (typeof value !== "string" || !value.trim()) {
+        res.status(400).json({
+          success: false,
+          message: `Invalid value for '${key}'`,
+        });
+        return;
+      }
+      updateData[key] = value.trim();
+    } else if (key === "additionalNotes") {
+      if (typeof value !== "string") {
+        res.status(400).json({
+          success: false,
+          message: "Invalid value for 'additionalNotes'",
+        });
+        return;
+      }
+      updateData[key] = value.trim();
+    } else if (key === "accountStatus") {
+      if (!isOneOf(value, accountStatuses)) {
+        res.status(400).json({
+          success: false,
+          message: "Invalid account status",
+        });
+        return;
+      }
+      updateData[key] = value;
+    } else if (key === "accountType") {
+      if (!isOneOf(value, accountTypes)) {
+        res.status(400).json({
+          success: false,
+          message: "Invalid account type",
+        });
+        return;
+      }
+      updateData[key] = value;
+    } else if (key === "applicationStatus") {
+      if (!isOneOf(value, applicationStatuses)) {
+        res.status(400).json({
+          success: false,
+          message: "Invalid application status",
+        });
+        return;
+      }
+      updateData[key] = value;
+    } else if (key === "applicationDate") {
+      if (typeof value !== "string" || Number.isNaN(Date.parse(value))) {
+        res.status(400).json({
+          success: false,
+          message: "Invalid application date",
+        });
+        return;
+      }
+      updateData[key] = new Date(value);
+    } else if (
+      key === "loanAmount" ||
+      key === "monthlyExpenses" ||
+      key === "monthlyIncome"
+    ) {
+      if (
+        typeof value !== "number" ||
+        !Number.isFinite(value) ||
+        (key === "loanAmount" ? value <= 0 : value < 0)
+      ) {
+        res.status(400).json({
+          success: false,
+          message: `Invalid value for '${key}'`,
+        });
+        return;
+      }
+      updateData[key] = value;
+    } else if (key === "termsAccepted") {
+      if (value !== true) {
+        res.status(400).json({
+          success: false,
+          message: "Loan terms must be accepted",
+        });
+        return;
+      }
+      updateData[key] = true;
+    }
+  }
+
+  try {
+    const loan = await loanService.updateLoan(id, updateData);
+    if (!loan) {
+      res.status(404).json({ success: false, message: "Loan not found" });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Loan application updated successfully",
+      data: loan,
+    });
+  } catch (error) {
+    if (error instanceof Error && error.name === "ValidationError") {
+      res.status(400).json({ success: false, message: error.message });
+      return;
+    }
+
+    console.error("Update loan error:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
 export const deleteLoan = async (req: Request, res: Response) => {
   const id = req.params.id;
   if (typeof id !== "string" || !isValidObjectId(id)) {

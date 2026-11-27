@@ -146,3 +146,129 @@ export const getTransferById = async (req: Request, res: Response) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
+export const updateTransfer = async (req: Request, res: Response) => {
+  const id = req.params.id;
+  if (typeof id !== "string" || !isValidObjectId(id)) {
+    res.status(400).json({ success: false, message: "Invalid transfer ID" });
+    return;
+  }
+
+  const body: unknown = req.body;
+  if (typeof body !== "object" || body === null || Array.isArray(body)) {
+    res.status(400).json({ success: false, message: "Invalid request body" });
+    return;
+  }
+
+  const input = body as Record<string, unknown>;
+  const updateData: Record<string, unknown> = {};
+  const accountNumberFields = ["accountNumber", "recipientAccountNumber"];
+  const allowedFields = [
+    "accountName",
+    ...accountNumberFields,
+    "accountType",
+    "availableBalance",
+    "transactionDate",
+    "transactionStatus",
+    "transferAmount",
+  ];
+
+  if (Object.keys(input).length === 0) {
+    res
+      .status(400)
+      .json({ success: false, message: "No transfer fields to update" });
+    return;
+  }
+
+  for (const [key, value] of Object.entries(input)) {
+    if (!allowedFields.includes(key)) {
+      res.status(400).json({
+        success: false,
+        message: `Field '${key}' cannot be updated`,
+      });
+      return;
+    }
+
+    if (key === "accountName") {
+      if (typeof value !== "string" || !value.trim()) {
+        res.status(400).json({
+          success: false,
+          message: "Invalid account name",
+        });
+        return;
+      }
+      updateData[key] = value.trim();
+    } else if (accountNumberFields.includes(key)) {
+      if (typeof value !== "string" || !/^\d{9}$/.test(value)) {
+        res.status(400).json({
+          success: false,
+          message: `'${key}' must be exactly 9 digits`,
+        });
+        return;
+      }
+      updateData[key] = value;
+    } else if (key === "accountType") {
+      if (!isOneOf(value, accountTypes)) {
+        res.status(400).json({
+          success: false,
+          message: "Invalid account type",
+        });
+        return;
+      }
+      updateData[key] = value;
+    } else if (key === "transactionStatus") {
+      if (!isOneOf(value, transactionStatuses)) {
+        res.status(400).json({
+          success: false,
+          message: "Invalid transaction status",
+        });
+        return;
+      }
+      updateData[key] = value;
+    } else if (key === "transactionDate") {
+      if (typeof value !== "string" || Number.isNaN(Date.parse(value))) {
+        res.status(400).json({
+          success: false,
+          message: "Invalid transaction date",
+        });
+        return;
+      }
+      updateData[key] = new Date(value);
+    } else if (key === "availableBalance" || key === "transferAmount") {
+      if (
+        typeof value !== "number" ||
+        !Number.isFinite(value) ||
+        (key === "availableBalance" ? value < 0 : value <= 0)
+      ) {
+        res.status(400).json({
+          success: false,
+          message: `Invalid value for '${key}'`,
+        });
+        return;
+      }
+      updateData[key] = value;
+    }
+  }
+
+  try {
+    const transfer = await transferService.updateTransfer(id, updateData);
+    if (!transfer) {
+      res.status(404).json({ success: false, message: "Transfer not found" });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Transfer updated successfully",
+      data: transfer,
+    });
+  } catch (error) {
+    if (error instanceof Error && error.name === "ValidationError") {
+      res.status(400).json({ success: false, message: error.message });
+      return;
+    }
+
+    console.error("Update transfer error:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};

@@ -31,6 +31,16 @@ const getWithdrawById = async (id: string) => {
   return Withdraw.findById(id);
 };
 
+const updateWithdraw = async (
+  id: string,
+  withdrawData: Record<string, unknown>
+) => {
+  return Withdraw.findByIdAndUpdate(id, withdrawData, {
+    new: true,
+    runValidators: true,
+  });
+};
+
 const deleteWithdraw = async (id: string) => {
   return Withdraw.findByIdAndDelete(id);
 };
@@ -39,5 +49,6 @@ export const withdrawService = {
   createWithdraw,
   getAllWithdraws,
   getWithdrawById,
+  updateWithdraw,
   deleteWithdraw,
 };

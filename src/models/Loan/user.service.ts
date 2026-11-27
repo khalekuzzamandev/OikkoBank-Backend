@@ -37,6 +37,13 @@ const getLoanById = async (id: string) => {
   return Loan.findById(id);
 };
 
+const updateLoan = async (id: string, loanData: Record<string, unknown>) => {
+  return Loan.findByIdAndUpdate(id, loanData, {
+    new: true,
+    runValidators: true,
+  });
+};
+
 const deleteLoan = async (id: string) => {
   return Loan.findByIdAndDelete(id);
 };
@@ -45,5 +52,6 @@ export const loanService = {
   createLoan,
   getAllLoans,
   getLoanById,
+  updateLoan,
   deleteLoan,
 };

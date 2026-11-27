@@ -27,8 +27,19 @@ const getTransferById = async (id: string) => {
   return Transfer.findById(id);
 };
 
+const updateTransfer = async (
+  id: string,
+  transferData: Record<string, unknown>
+) => {
+  return Transfer.findByIdAndUpdate(id, transferData, {
+    new: true,
+    runValidators: true,
+  });
+};
+
 export const transferService = {
   createTransfer,
   getAllTransfers,
   getTransferById,
+  updateTransfer,
 };
