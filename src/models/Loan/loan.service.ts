@@ -9,7 +9,7 @@ type CreateLoanData = {
   accountType: "Savings" | "Current" | "Salary" | "Student" | "Fixed Deposit";
   additionalNotes?: string;
   applicationDate: Date;
-  applicationStatus: "Pending" | "Approved" | "Rejected";
+  applicationStatus: "Pending"|"Reviewing"| "Approved" | "Rejected";
   employmentDuration: string;
   loanAmount: number;
   loanDuration: string;

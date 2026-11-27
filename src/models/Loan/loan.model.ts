@@ -45,7 +45,7 @@ const loanSchema = new Schema(
     applicationStatus: {
       type: String,
       required: true,
-      enum: ["Pending", "Approved", "Rejected"],
+      enum: ["Pending", "Reviewing", "Approved", "Rejected"],
       default: "Pending",
     },
     employmentDuration: {

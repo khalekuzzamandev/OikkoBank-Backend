@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { isValidObjectId } from "mongoose";
-import { loanService } from "./user.service.js";
+import { loanService } from "./loan.service.js";
 
 const isOneOf = <T extends readonly string[]>(
   value: unknown,
@@ -16,7 +16,7 @@ const accountTypes = [
   "Student",
   "Fixed Deposit",
 ] as const;
-const applicationStatuses = ["Pending", "Approved", "Rejected"] as const;
+const applicationStatuses = ["Pending", "Reviewing", "Approved", "Rejected"] as const;
 
 export const createLoan = async (req: Request, res: Response) => {
   const body: unknown = req.body;
