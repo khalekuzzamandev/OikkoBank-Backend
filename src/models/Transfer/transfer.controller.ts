@@ -272,3 +272,28 @@ export const updateTransfer = async (req: Request, res: Response) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
+export const deleteTransfer = async (req: Request, res: Response) => {
+  const id = req.params.id;
+  if (typeof id !== "string" || !isValidObjectId(id)) {
+    res.status(400).json({ success: false, message: "Invalid transfer ID" });
+    return;
+  }
+
+  try {
+    const transfer = await transferService.deleteTransfer(id);
+    if (!transfer) {
+      res.status(404).json({ success: false, message: "Transfer not found" });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Transfer deleted successfully",
+      data: transfer,
+    });
+  } catch (error) {
+    console.error("Delete transfer error:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};

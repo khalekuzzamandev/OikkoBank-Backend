@@ -37,9 +37,14 @@ const updateTransfer = async (
   });
 };
 
+const deleteTransfer = async (id: string) => {
+  return Transfer.findByIdAndDelete(id);
+};
+
 export const transferService = {
   createTransfer,
   getAllTransfers,
   getTransferById,
   updateTransfer,
+  deleteTransfer,
 };

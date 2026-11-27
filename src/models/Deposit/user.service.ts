@@ -29,8 +29,13 @@ const getDepositById = async (id: string) => {
   return Deposit.findById(id);
 };
 
+const deleteDeposit = async (id: string) => {
+  return Deposit.findByIdAndDelete(id);
+};
+
 export const depositService = {
   createDeposit,
   getAllDeposits,
   getDepositById,
+  deleteDeposit,
 };
